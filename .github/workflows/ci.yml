@@ -1,57 +1,50 @@
 name: Test CI/CD
-
-on:
+'on':
   pull_request:
     branches:
       - master
-
 jobs:
   perform-ci-cd:
     runs-on: ubuntu-latest
-    - name: Checkout project
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-    - name: Setup NodeJS
-      uses: actions/setup-node@v3
-      with:
-        node-version: '16.x'
-
-      # https://docs.github.com/en/actions/using-workflows/caching-dependencies-to-speed-up-workflows
-    - name: Attempt to restore the cache
-      uses: actions/cache/restore@v3
-      id: cache
-      with:
-        path: ./node_modules
-        # The hashFiles function is used to generate a unique key for the cache based on the contents of the package-lock.json file.
-        # This ensures that the cache is only invalidated when the dependencies of the project change.
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-        # 'restore-keys' are fallback keys used if a cache miss occurs on the 'key' field. They provide a way to restore
-        # a cache from a previous state that doesn't match exactly with the 'key'. They are checked sequentially until a cache hit is found.
-        # A list of restore-keys is useful when you are restoring a cache from another branch because restore-keys can partially match cache keys.
-        restore-keys: |
-          ${{ runner.os }}-node-
-          ${{ runner.os }}-
-
-    - name: Install dependencies if cache miss
-      if: steps.cache.outputs.cache-hit != 'true'
-      run: npm ci --ignore-scripts --no-audit --prefer-offline --no-fund
-
-    - name: Save the cache after installing dependencies
-      if: steps.cache.outputs.cache-hit != 'true'
-      uses: actions/cache/save@v3
-      with:
-        path: ./node_modules
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-
-    - name: Run ESLint
-      run: npx eslint $(git diff --relative --diff-filter=ACM --name-only ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | xargs)
-      if: always()
-
-    - name: Run Prettier
-      run: npx prettier --check $(git diff --relative --diff-filter=ACM --name-only ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | xargs)
-      if: always()
-
-    - name: Run Jest
-      run: npx jest
-      if: always()
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Setup NodeJS
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+      - name: Attempt to restore the cache
+        uses: actions/cache/restore@v3
+        id: cache
+        with:
+          path: ./node_modules
+          key: '${{ runner.os }}-node-${{ hashFiles(''**/package-lock.json'') }}'
+          restore-keys: |
+            ${{ runner.os }}-node-
+            ${{ runner.os }}-
+      - name: Install dependencies if cache miss
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: npm ci --ignore-scripts --no-audit --prefer-offline --no-fund
+      - name: Save the cache after installing dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v3
+        with:
+          path: ./node_modules
+          key: '${{ runner.os }}-node-${{ hashFiles(''**/package-lock.json'') }}'
+      - name: Run ESLint
+        run: >-
+          npx eslint $(git diff --relative --diff-filter=ACM --name-only ${{
+          github.event.pull_request.base.sha }}..${{
+          github.event.pull_request.head.sha }} | xargs)
+        if: always()
+      - name: Run Prettier
+        run: >-
+          npx prettier --check $(git diff --relative --diff-filter=ACM
+          --name-only ${{ github.event.pull_request.base.sha }}..${{
+          github.event.pull_request.head.sha }} | xargs)
+        if: always()
+      - name: Run Jest
+        run: npx jest
+        if: always()
