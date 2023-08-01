@@ -43,6 +43,7 @@ jobs:
           github.event.pull_request.head.sha }} | grep  -E '\.(js|jsx)$' |
           xargs)
         if: always()
+        working-directory: ${{ github.workspace }}/projects/test-this
       - name: Run Prettier
         run: >-
           npx prettier --check $(git diff --relative --diff-filter=ACM
@@ -50,6 +51,7 @@ jobs:
           github.event.pull_request.head.sha }} | grep  -E
           '\.(js|jsx|mdx|scss)$' | xargs)
         if: always()
+        working-directory: ${{ github.workspace }}/projects/test-this
       - name: Run Jest
         run: npx jest
         if: always()
