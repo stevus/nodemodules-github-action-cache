@@ -52,3 +52,4 @@ jobs:
       - name: Run Jest
         run: npx jest
         if: always()
+        working-directory: ${{ github.workspace }}/projects/test-this
