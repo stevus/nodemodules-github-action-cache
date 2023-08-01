@@ -1,33 +1,50 @@
 name: Test CI/CD
-
-on: workflow_dispatch
-
+'on':
+  pull_request:
+    branches:
+      - master
 jobs:
-  setup-cache:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-    - uses: actions/setup-node@v3
-      with:
-        node-version: '16.x'
-
   perform-ci-cd:
     runs-on: ubuntu-latest
-    needs: setup-cache
     steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-    - uses: actions/setup-node@v3
-      with:
-        node-version: '16.x'
-
-    - run: npm ci --no-audit --prefer-offline
-
-    - run: npx eslint $(git diff --relative --diff-filter=ACM --name-only ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | xargs)
-
-    - run: npx prettier --check $(git diff --relative --diff-filter=ACM --name-only ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | xargs)
-
-    - run: npx jest
+      - name: Checkout project
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Setup NodeJS
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+      - name: Attempt to restore the cache
+        uses: actions/cache/restore@v3
+        id: cache
+        with:
+          path: ./node_modules
+          key: '${{ runner.os }}-node-${{ hashFiles(''**/package-lock.json'') }}'
+          restore-keys: |
+            ${{ runner.os }}-node-
+            ${{ runner.os }}-
+      - name: Install dependencies if cache miss
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: npm ci --ignore-scripts --no-audit --prefer-offline --no-fund
+      - name: Save the cache after installing dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v3
+        with:
+          path: ./node_modules
+          key: '${{ runner.os }}-node-${{ hashFiles(''**/package-lock.json'') }}'
+      - name: Run ESLint
+        run: >-
+          npx eslint $(git diff --relative --diff-filter=ACM --name-only ${{
+          github.event.pull_request.base.sha }}..${{
+          github.event.pull_request.head.sha }} | xargs)
+        if: always()
+      - name: Run Prettier
+        run: >-
+          npx prettier --check $(git diff --relative --diff-filter=ACM
+          --name-only ${{ github.event.pull_request.base.sha }}..${{
+          github.event.pull_request.head.sha }} | xargs)
+        if: always()
+      - name: Run Jest
+        run: npx jest
+        if: always()
