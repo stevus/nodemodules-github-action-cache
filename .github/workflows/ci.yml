@@ -10,7 +10,9 @@ jobs:
       - name: Checkout project
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          fetch-depth: 2
+          sparse-checkout: projects/test-this
+      - run: git fetch origin
       - name: Setup NodeJS
         uses: actions/setup-node@v3
         with:
@@ -37,14 +39,17 @@ jobs:
         run: >-
           npx eslint $(git diff --relative --diff-filter=ACM --name-only ${{
           github.event.pull_request.base.sha }}..${{
-          github.event.pull_request.head.sha }} | xargs)
+          github.event.pull_request.head.sha }} | grep  -E '\.(js|jsx)$' |
+          xargs)
         if: always()
       - name: Run Prettier
         run: >-
           npx prettier --check $(git diff --relative --diff-filter=ACM
           --name-only ${{ github.event.pull_request.base.sha }}..${{
-          github.event.pull_request.head.sha }} | xargs)
+          github.event.pull_request.head.sha }} | grep  -E
+          '\.(js|jsx|mdx|scss)$' | xargs)
         if: always()
       - name: Run Jest
         run: npx jest
         if: always()
+        working-directory: ${{ github.workspace }}/projects/test-this
