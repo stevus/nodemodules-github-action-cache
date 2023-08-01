@@ -1,4 +1,5 @@
 function functionA(parameterA) {
+  // This is a comment
   return parameterA + 2
 }
 
