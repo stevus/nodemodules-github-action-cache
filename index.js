@@ -1,5 +1,5 @@
 function functionA(parameterA) {
-  return parameterA + 4
+  return parameterA + 2
 }
 
 module.exports = {
