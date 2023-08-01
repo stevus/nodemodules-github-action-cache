@@ -1,0 +1,36 @@
+name: Setup Cache
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  setup-cache:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Setup NodeJS
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+      - name: Attempt to restore the cache
+        uses: actions/cache/restore@v3
+        id: cache
+        with:
+          path: ./node_modules
+          key: '${{ runner.os }}-node-${{ hashFiles(''**/package-lock.json'') }}'
+          restore-keys: |
+            ${{ runner.os }}-node-
+            ${{ runner.os }}-
+      - name: Install dependencies if cache miss
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: npm ci --ignore-scripts --no-audit --prefer-offline --no-fund
+      - name: Save the cache after installing dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v3
+        with:
+          path: ./node_modules
+          key: '${{ runner.os }}-node-${{ hashFiles(''**/package-lock.json'') }}'
