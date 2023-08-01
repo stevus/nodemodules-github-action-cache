@@ -1,5 +1,5 @@
 function functionA(parameterA) {
-  console.log(doesNotExistAgain)
+  console.log(doesNotExistAgainAndAgain)
   return parameterA + 2
 }
 
