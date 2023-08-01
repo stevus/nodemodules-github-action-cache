@@ -3,6 +3,7 @@ name: Test CI/CD
   pull_request:
     branches:
       - master
+      
 jobs:
   perform-ci-cd:
     runs-on: ubuntu-latest
@@ -21,7 +22,7 @@ jobs:
         uses: actions/cache/restore@v3
         id: cache
         with:
-          path: ./node_modules
+          path: ./projects/test-this/node_modules
           key: '${{ runner.os }}-node-${{ hashFiles(''**/package-lock.json'') }}'
           restore-keys: |
             ${{ runner.os }}-node-
@@ -34,7 +35,7 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v3
         with:
-          path: ./node_modules
+          path: ./projects/test-this/node_modules
           key: '${{ runner.os }}-node-${{ hashFiles(''**/package-lock.json'') }}'
         working-directory: ${{ github.workspace }}/projects/test-this
       - name: Run ESLint
