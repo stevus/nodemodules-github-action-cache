@@ -1,5 +1,4 @@
 function functionB(parameterA) {
-  console.log(notDefined)
   return parameterA + 2
 }
 
