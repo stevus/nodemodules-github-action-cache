@@ -1,6 +1,9 @@
 name: Test CI/CD
 
-on: workflow_dispatch
+on:
+  pull_request:
+    branches:
+      - master
 
 jobs:
   setup-cache:
