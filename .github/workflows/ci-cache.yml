@@ -20,11 +20,12 @@ jobs:
         uses: actions/cache/restore@v3
         id: cache
         with:
-          path: ./projects/test-this/node_modules
+          path: ./node_modules
           key: '${{ runner.os }}-node-${{ hashFiles(''**/package-lock.json'') }}'
           restore-keys: |
             ${{ runner.os }}-node-
             ${{ runner.os }}-
+        working-directory: ${{ github.workspace }}/projects/test-this
       - name: Install dependencies if cache miss
         if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci --ignore-scripts --no-audit --prefer-offline --no-fund
@@ -33,5 +34,6 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v3
         with:
-          path: ./projects/test-this/node_modules
+          path: ./node_modules
           key: '${{ runner.os }}-node-${{ hashFiles(''**/package-lock.json'') }}'
+        working-directory: ${{ github.workspace }}/projects/test-this

@@ -21,22 +21,21 @@ jobs:
         uses: actions/cache/restore@v3
         id: cache
         with:
-          path: ./node_modules
+          path: ./projects/test-this/node_modules
           key: '${{ runner.os }}-node-${{ hashFiles(''**/package-lock.json'') }}'
           restore-keys: |
             ${{ runner.os }}-node-
             ${{ runner.os }}-
-        working-directory: ${{ github.workspace }}/projects/test-this
       - name: Install dependencies if cache miss
         if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci --ignore-scripts --no-audit --prefer-offline --no-fund
+        working-directory: '${{ github.workspace }}/projects/test-this'
       - name: Save the cache after installing dependencies
         if: steps.cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v3
         with:
-          path: ./node_modules
+          path: ./projects/test-this/node_modules
           key: '${{ runner.os }}-node-${{ hashFiles(''**/package-lock.json'') }}'
-        working-directory: ${{ github.workspace }}/projects/test-this
       - name: Run ESLint
         run: >-
           npx eslint $(git diff --relative --diff-filter=ACM --name-only ${{
@@ -44,14 +43,17 @@ jobs:
           github.event.pull_request.head.sha }} | grep  -E '\.(js|jsx)$' |
           xargs)
         if: always()
+        working-directory: '${{ github.workspace }}/projects/test-this'
       - name: Run Prettier
         run: >-
-          npx prettier --check $(git diff --relative --diff-filter=ACM
-          --name-only ${{ github.event.pull_request.base.sha }}..${{
+          npx prettier --no-error-on-unmatched-pattern --check $(git diff
+          --relative --diff-filter=ACM --name-only ${{
+          github.event.pull_request.base.sha }}..${{
           github.event.pull_request.head.sha }} | grep  -E
-          '\.(js|jsx|mdx|scss)$' | xargs)
+          '\.(js|jsx|mdx|scss)$' | xargs) ' '
         if: always()
+        working-directory: '${{ github.workspace }}/projects/test-this'
       - name: Run Jest
         run: npx jest
         if: always()
-        working-directory: ${{ github.workspace }}/projects/test-this
+        working-directory: '${{ github.workspace }}/projects/test-this'
