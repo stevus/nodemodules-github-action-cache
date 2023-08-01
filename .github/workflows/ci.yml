@@ -3,7 +3,6 @@ name: Test CI/CD
   pull_request:
     branches:
       - master
-      
 jobs:
   perform-ci-cd:
     runs-on: ubuntu-latest
@@ -30,7 +29,7 @@ jobs:
       - name: Install dependencies if cache miss
         if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci --ignore-scripts --no-audit --prefer-offline --no-fund
-        working-directory: ${{ github.workspace }}/projects/test-this
+        working-directory: '${{ github.workspace }}/projects/test-this'
       - name: Save the cache after installing dependencies
         if: steps.cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v3
@@ -44,16 +43,17 @@ jobs:
           github.event.pull_request.head.sha }} | grep  -E '\.(js|jsx)$' |
           xargs)
         if: always()
-        working-directory: ${{ github.workspace }}/projects/test-this
+        working-directory: '${{ github.workspace }}/projects/test-this'
       - name: Run Prettier
         run: >-
-          npx prettier --check $(git diff --relative --diff-filter=ACM
-          --name-only ${{ github.event.pull_request.base.sha }}..${{
+          npx prettier --no-error-on-unmatched-pattern --check $(git diff
+          --relative --diff-filter=ACM --name-only ${{
+          github.event.pull_request.base.sha }}..${{
           github.event.pull_request.head.sha }} | grep  -E
-          '\.(js|jsx|mdx|scss)$' | xargs)
+          '\.(js|jsx|mdx|scss)$' | xargs) ' '
         if: always()
-        working-directory: ${{ github.workspace }}/projects/test-this
+        working-directory: '${{ github.workspace }}/projects/test-this'
       - name: Run Jest
         run: npx jest
         if: always()
-        working-directory: ${{ github.workspace }}/projects/test-this
+        working-directory: '${{ github.workspace }}/projects/test-this'
