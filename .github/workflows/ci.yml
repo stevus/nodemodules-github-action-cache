@@ -5,15 +5,43 @@ on: workflow_dispatch
 jobs:
   setup-cache:
     runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - uses: actions/setup-node@v3
+      with:
+        node-version: '16.x'
 
   eslint:
     runs-on: ubuntu-latest
     needs: setup-cache
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - uses: actions/setup-node@v3
+      with:
+        node-version: '16.x'
 
   jest:
     runs-on: ubuntu-latest
     needs: setup-cache
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - uses: actions/setup-node@v3
+      with:
+        node-version: '16.x'
 
   prettier:
     runs-on: ubuntu-latest
     needs: setup-cache
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - uses: actions/setup-node@v3
+      with:
+        node-version: '16.x'
